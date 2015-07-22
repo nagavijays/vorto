@@ -25,9 +25,9 @@ class ConfigurationClassTemplateTest {
 
 	@Test
 	def testGeneration() {
-		var fbModel = TestFunctionblockModelFactory.createFBmodelWithProperties();
+		var fbProperty = TestFunctionblockModelFactory.createFBProperty();
 
-		var result = new ConfigurationClassTemplate().getContent(fbModel);
+		var result = new ConfigurationClassTemplate().getContent(fbProperty);
 		assertEquals(fetchExpected, result);
 	}
 

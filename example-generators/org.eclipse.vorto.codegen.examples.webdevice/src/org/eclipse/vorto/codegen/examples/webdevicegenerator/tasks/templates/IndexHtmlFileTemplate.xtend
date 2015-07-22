@@ -17,7 +17,7 @@
 
 import org.eclipse.vorto.codegen.api.tasks.ITemplate
 import org.eclipse.vorto.core.api.model.datatype.PrimitivePropertyType
-import org.eclipse.vorto.core.api.model.functionblock.FunctionblockModel
+import org.eclipse.vorto.core.api.model.informationmodel.FunctionblockProperty
 import org.eclipse.vorto.core.api.model.informationmodel.InformationModel
 
 class IndexHtmlFileTemplate implements ITemplate<InformationModel> {
@@ -35,7 +35,7 @@ class IndexHtmlFileTemplate implements ITemplate<InformationModel> {
 				$(function() {
 					$( "#tabs" ).tabs();
 					«FOR fbModelProperty: informationModel.properties»
-					displayProperties("«fbModelProperty.type.name»");	
+					displayProperties("«fbModelProperty.name»");	
 					«ENDFOR»
 				});
 			</script>						
@@ -75,12 +75,12 @@ class IndexHtmlFileTemplate implements ITemplate<InformationModel> {
 				<div id="tabs">
 					<ul>
 						«FOR fbModelProp: informationModel.properties»
-							<li><a href="#functionblocktab-«fbModelProp.type.name.toLowerCase»">«fbModelProp.type.name»</a></li>
+							<li><a href="#functionblocktab-«fbModelProp.name.toLowerCase»">«fbModelProp.name»</a></li>
 						«ENDFOR»
 					</ul>
 					«FOR fbModelProp: informationModel.properties»
-						<div id="functionblocktab-«fbModelProp.type.name.toLowerCase»">	
-						    «getFunctionBlockContent(informationModel, fbModelProp.type)»		
+						<div id="functionblocktab-«fbModelProp.name.toLowerCase»">	
+						    «getFunctionBlockContent(informationModel, fbModelProp)»		
 						</div>
 					«ENDFOR»
 				</div>		
@@ -90,30 +90,30 @@ class IndexHtmlFileTemplate implements ITemplate<InformationModel> {
 		'''		
 	}	
 	
-	def getFunctionBlockContent(InformationModel informationModel, FunctionblockModel model) {
+	def getFunctionBlockContent(InformationModel informationModel, FunctionblockProperty fbProperty) {
 		return '''<table border="0" align="center" width="100%">
 				<tr>
 					<td align="center">
-					«FOR operation : model.functionblock.operations»
-						&nbsp;<button type="button" value="«operation.name»" title="«operation.description»" onClick="javascript:invokeOperation('«model.name»', '«operation.name»')">«WordSeperator.splitIntoWords(operation.name)»</button>&nbsp;
+					«FOR operation : fbProperty.type.functionblock.operations»
+						&nbsp;<button type="button" value="«operation.name»" title="«operation.description»" onClick="javascript:invokeOperation('«fbProperty.name»', '«operation.name»')">«WordSeperator.splitIntoWords(operation.name)»</button>&nbsp;
 					«ENDFOR»
 					</td>
 				</tr>				
 				<tr>
 					<td>
-						<fieldset id="«model.name»_status_fieldset">
+						<fieldset id="«fbProperty.name»_status_fieldset">
 							<legend>Status:</legend>
-							«IF  model.functionblock.status!=null && model.functionblock.status.properties.size>0»
+							«IF  fbProperty.type.functionblock.status!=null && fbProperty.type.functionblock.status.properties.size>0»
 							<table border="0" align="center" width="100%">
 							«var i=0»
-							«FOR status : model.functionblock.status.properties»
+							«FOR status : fbProperty.type.functionblock.status.properties»
 							«IF status.type instanceof PrimitivePropertyType»
 							«IF i%2==0»
 								<tr>
 							«ENDIF»
 								<td  width="20%"><label>«WordSeperator.splitIntoWords(status.name)»:</label></td>
-								<td width="30%"><label id="«model.name»_status_id_«status.name»" class="display"></label></td>
-							«IF (i==model.functionblock.status.properties.size-1) && (model.functionblock.status.properties.size%2==1)»
+								<td width="30%"><label id="«fbProperty.name»_status_id_«status.name»" class="display"></label></td>
+							«IF (i==fbProperty.type.functionblock.status.properties.size-1) && (fbProperty.type.functionblock.status.properties.size%2==1)»
 								<td  width="20%"><label></td>
 								<td  width="30%"><label></td>
 								</tr>
@@ -134,19 +134,19 @@ class IndexHtmlFileTemplate implements ITemplate<InformationModel> {
 				</tr>
 				<tr>
 					<td>
-						<fieldset id="«model.name»_configuration_fieldset">
+						<fieldset id="«fbProperty.name»_configuration_fieldset">
 							<legend>Configuration:</legend>
-							«IF model.functionblock.configuration!=null && model.functionblock.configuration.properties.size>0»
+							«IF fbProperty.type.functionblock.configuration!=null && fbProperty.type.functionblock.configuration.properties.size>0»
 							<table border="0" align="center" width="100%">
 								«var i=0»
-								«FOR configuration : model.functionblock.configuration.properties»
+								«FOR configuration : fbProperty.type.functionblock.configuration.properties»
 								«IF configuration.type instanceof PrimitivePropertyType»
 								«IF i%2==0»
 									<tr>
 								«ENDIF»
 									<td  width="20%"><label>«WordSeperator.splitIntoWords(configuration.name)»:</label></td>
-									<td width="30%"><input type="text" name="«model.name»_configuration_id_«configuration.name»" id="«model.name»_configuration_id_«configuration.name»">
-									«IF  (i==model.functionblock.configuration.properties.size-1) && (model.functionblock.configuration.properties.size%2==1)»
+									<td width="30%"><input type="text" name="«fbProperty.name»_configuration_id_«configuration.name»" id="«fbProperty.name»_configuration_id_«configuration.name»">
+									«IF  (i==fbProperty.type.functionblock.configuration.properties.size-1) && (fbProperty.type.functionblock.configuration.properties.size%2==1)»
 											<td  width="20%"><label></td>
 											<td  width="30%"><label></td>
 										</tr>
@@ -164,7 +164,7 @@ class IndexHtmlFileTemplate implements ITemplate<InformationModel> {
 								
 								</td>
 								<td width="30%" align="right">
-									<button type="button" value="setR" title="" onClick="javascript:saveConfiguration('«model.name»')">Save</button>
+									<button type="button" value="setR" title="" onClick="javascript:saveConfiguration('«fbProperty.name»')">Save</button>
 								</td>												
 								</td>
 							</tr>								
@@ -179,19 +179,19 @@ class IndexHtmlFileTemplate implements ITemplate<InformationModel> {
 				</tr>				
 				<tr>
 					<td>
-						<fieldset id="«model.name»_fault_fieldset">
+						<fieldset id="«fbProperty.name»_fault_fieldset">
 							<legend>Fault:</legend>
-							«IF  model.functionblock.fault!=null && model.functionblock.fault.properties.size>0»
+							«IF  fbProperty.type.functionblock.fault!=null && fbProperty.type.functionblock.fault.properties.size>0»
 							<table border="0" align="center" width="100%">
 							«var i=0»
-							«FOR fault : model.functionblock.fault.properties»
+							«FOR fault : fbProperty.type.functionblock.fault.properties»
 							«IF fault.type instanceof PrimitivePropertyType»
 							«IF i%2==0»
 								<tr>
 							«ENDIF»
 								<td  width="20%"><label>«WordSeperator.splitIntoWords(fault.name)»:</label></td>
-								<td width="30%"><label id="«model.name»_fault_id_«fault.name»" class="display"></label></td>
-							«IF (i==model.functionblock.fault.properties.size-1) && (model.functionblock.fault.properties.size%2==1)»
+								<td width="30%"><label id="«fbProperty.name»_fault_id_«fault.name»" class="display"></label></td>
+							«IF (i==fbProperty.type.functionblock.fault.properties.size-1) && (fbProperty.type.functionblock.fault.properties.size%2==1)»
 									<td  width="20%"><label></td>
 									<td  width="30%"><label></td>
 								</tr>
@@ -224,10 +224,10 @@ class IndexHtmlFileTemplate implements ITemplate<InformationModel> {
 					<td align="center">Device Detected</td>
 					<td align="center">30</td>
 					<td align="center">2015-02-27 10:10:02</td>
-					<td align="center">New «model.name» function block instance detected.</td>
+					<td align="center">New «fbProperty.type.name» function block instance detected.</td>
 				</tr>	
 				«var i=2»
-				«FOR event : model.functionblock.events»
+				«FOR event : fbProperty.type.functionblock.events»
 				<tr>
 					<td align="center">«i++»</td>
 					<td align="center">«event.name»</td>

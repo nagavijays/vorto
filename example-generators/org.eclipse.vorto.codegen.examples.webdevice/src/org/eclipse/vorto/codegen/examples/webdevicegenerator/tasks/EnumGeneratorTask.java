@@ -1,0 +1,24 @@
+package org.eclipse.vorto.codegen.examples.webdevicegenerator.tasks;
+
+import org.eclipse.vorto.codegen.api.tasks.AbstractTemplateGeneratorTask;
+import org.eclipse.vorto.codegen.api.tasks.ITemplate;
+import org.eclipse.vorto.codegen.examples.webdevicegenerator.tasks.templates.EnumTemplate;
+import org.eclipse.vorto.core.api.model.datatype.Enum;
+
+public class EnumGeneratorTask extends
+		AbstractTemplateGeneratorTask<Enum> {
+	@Override
+	public String getFileName(final Enum e) {
+		return e.getName() + ".java";
+	}
+
+	@Override
+	public String getPath(final Enum e) {
+		return ModuleUtil.getEnumPath(e);
+	}
+
+	@Override
+	public ITemplate<Enum> getTemplate() {
+		return new EnumTemplate();
+	}
+}

@@ -18,11 +18,14 @@
 import org.eclipse.vorto.codegen.api.tasks.ITemplate
 import org.eclipse.vorto.codegen.examples.webdevicegenerator.tasks.ModuleUtil
 import org.eclipse.vorto.core.api.model.functionblock.FunctionblockModel
+import org.eclipse.vorto.core.api.model.informationmodel.FunctionblockProperty
 
-class ServiceClassTemplate implements ITemplate<FunctionblockModel> {
+class ServiceClassTemplate implements ITemplate<FunctionblockProperty> {
 		
-	override getContent(FunctionblockModel model) {
-		'''
+	override getContent(FunctionblockProperty fbProperty) {
+		var FunctionblockModel model = fbProperty.getType()
+		
+		return '''
 		package «ModuleUtil.getServicePackage(model)»;
 
 		import java.lang.reflect.InvocationTargetException;
@@ -41,19 +44,19 @@ class ServiceClassTemplate implements ITemplate<FunctionblockModel> {
 		
 		import org.apache.commons.beanutils.BeanUtils;
 		
-		import com.bosch.iot.«model.name.toLowerCase».model.«model.name»;
-		import com.bosch.iot.«model.name.toLowerCase».model.«model.name»Configuration;		
+		import «ModuleUtil.getModelPackage(model)».«fbProperty.name»;
+		import «ModuleUtil.getModelPackage(model)».«fbProperty.name»Configuration;		
 		
-		@Path("/«model.name»")
-		public class «model.name»Service {	
-			private static Logger logger = Logger.getLogger("«model.name»"); 		
-			private static «model.name» «model.name.toFirstLower»instance = new «model.name»();
+		@Path("/«fbProperty.name»")
+		public class «fbProperty.name»Service {	
+			private static Logger logger = Logger.getLogger("«fbProperty.name»"); 		
+			private static «fbProperty.name» «fbProperty.name.toFirstLower»instance = new «fbProperty.name»();
 
 			@GET
 			@Path("/instance")
 			@Produces(MediaType.APPLICATION_JSON)
-			public «model.name» getInstance(){
-				return «model.name.toFirstLower»instance ;			
+			public «fbProperty.name» getInstance(){
+				return «fbProperty.name.toFirstLower»instance ;			
 			}		
 										
 			«FOR operation : model.functionblock.operations»				
@@ -78,7 +81,7 @@ class ServiceClassTemplate implements ITemplate<FunctionblockModel> {
 				logger.info("saveConfiguration invoked: " + configurationData);
 				Map<String, String> rawMap = (Map<String, String>) configurationData;
 		
-				«model.name»Configuration configuration = «model.name.toFirstLower»instance.getConfiguration();
+				«fbProperty.name»Configuration configuration = «fbProperty.name.toFirstLower»instance.getConfiguration();
 				BeanUtils.populate(configuration, getMapWithoutKeyPrefix(rawMap));
 		
 			}

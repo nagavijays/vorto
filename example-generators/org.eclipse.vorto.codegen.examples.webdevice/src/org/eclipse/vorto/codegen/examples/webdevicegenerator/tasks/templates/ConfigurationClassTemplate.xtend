@@ -19,17 +19,20 @@ import org.eclipse.vorto.codegen.api.tasks.ITemplate
 import org.eclipse.vorto.codegen.examples.webdevicegenerator.tasks.ModuleUtil
 import org.eclipse.vorto.core.api.model.datatype.PrimitivePropertyType
 import org.eclipse.vorto.core.api.model.functionblock.FunctionblockModel
+import org.eclipse.vorto.core.api.model.informationmodel.FunctionblockProperty
 
-class ConfigurationClassTemplate implements ITemplate<FunctionblockModel> {
+class ConfigurationClassTemplate implements ITemplate<FunctionblockProperty> {
 		
-	override getContent(FunctionblockModel model) {
-		'''
+	override getContent(FunctionblockProperty fbProperty) {
+		var FunctionblockModel model = fbProperty.type
+		
+		return '''
 		package «ModuleUtil.getModelPackage(model)»;
 
 		import org.codehaus.jackson.map.annotate.JsonSerialize;
 		
 		@JsonSerialize
-		public class «model.name»Configuration {			
+		public class «fbProperty.name»Configuration {			
 		«IF model.functionblock.configuration!=null»
 			«FOR configurationField : model.functionblock.configuration.properties»	
 			«IF configurationField.type instanceof PrimitivePropertyType»			

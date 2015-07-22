@@ -18,13 +18,16 @@
 import org.eclipse.vorto.codegen.api.tasks.ITemplate
 import org.eclipse.vorto.codegen.examples.webdevicegenerator.tasks.ModuleUtil
 import org.eclipse.vorto.core.api.model.functionblock.FunctionblockModel
+import org.eclipse.vorto.core.api.model.informationmodel.FunctionblockProperty
 
-class FunctionBlockClassTemplate implements ITemplate<FunctionblockModel> {		
-	override getContent(FunctionblockModel model) {
-		'''
+class FunctionBlockClassTemplate implements ITemplate<FunctionblockProperty> {		
+	override getContent(FunctionblockProperty fbProperty) {
+		var FunctionblockModel model = fbProperty.getType()
+		
+		return '''
 		package «ModuleUtil.getModelPackage(model)»;
 
-		public class «model.name» {
+		public class «fbProperty.name» {
 			
 			private String displayName = "«model.functionblock.displayname»";
 			private String description = "«model.functionblock.description»";
@@ -32,11 +35,11 @@ class FunctionBlockClassTemplate implements ITemplate<FunctionblockModel> {
 			private String category = "«model.functionblock.category»";
 			private String version = "«model.version»";
 			
-			private «model.name»Configuration configuration = new «model.name»Configuration();
+			private «fbProperty.name»Configuration configuration = new «fbProperty.name»Configuration();
 			
-			private «model.name»Status status = new «model.name»Status();
+			private «fbProperty.name»Status status = new «fbProperty.name»Status();
 			
-			private «model.name»Fault fault = new «model.name»Fault();
+			private «fbProperty.name»Fault fault = new «fbProperty.name»Fault();
 			
 			public String getDisplayName() {
 				return displayName;
@@ -58,15 +61,15 @@ class FunctionBlockClassTemplate implements ITemplate<FunctionblockModel> {
 				return version;
 			}	
 					
-			public «model.name»Configuration getConfiguration() {
+			public «fbProperty.name»Configuration getConfiguration() {
 				return configuration;
 			}
 			
-			public «model.name»Status getStatus() {
+			public «fbProperty.name»Status getStatus() {
 				return status;
 			}
 			
-			public «model.name»Fault getFault() {
+			public «fbProperty.name»Fault getFault() {
 				return fault;
 			}
 		}'''

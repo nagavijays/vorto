@@ -22,6 +22,8 @@ import org.eclipse.vorto.codegen.api.ICodeGenerator;
 import org.eclipse.vorto.codegen.api.tasks.ITemplate;
 import org.eclipse.vorto.codegen.api.tasks.eclipse.EclipseProjectGenerator;
 import org.eclipse.vorto.codegen.examples.webdevicegenerator.tasks.ConfigurationClassGeneratorTask;
+import org.eclipse.vorto.codegen.examples.webdevicegenerator.tasks.EntityClassGeneratorTask;
+import org.eclipse.vorto.codegen.examples.webdevicegenerator.tasks.EnumGeneratorTask;
 import org.eclipse.vorto.codegen.examples.webdevicegenerator.tasks.FaultClassGeneratorTask;
 import org.eclipse.vorto.codegen.examples.webdevicegenerator.tasks.FunctionBlockClassGeneratorTask;
 import org.eclipse.vorto.codegen.examples.webdevicegenerator.tasks.IndexHtmlFileGeneratorTask;
@@ -30,6 +32,10 @@ import org.eclipse.vorto.codegen.examples.webdevicegenerator.tasks.ServiceClassG
 import org.eclipse.vorto.codegen.examples.webdevicegenerator.tasks.StatusClassGeneratorTask;
 import org.eclipse.vorto.codegen.examples.webdevicegenerator.tasks.WebXmlGeneratorTask;
 import org.eclipse.vorto.codegen.examples.webdevicegenerator.tasks.templates.PomFileTemplate;
+import org.eclipse.vorto.core.api.model.datatype.Entity;
+import org.eclipse.vorto.core.api.model.datatype.Enum;
+import org.eclipse.vorto.core.api.model.datatype.ObjectPropertyType;
+import org.eclipse.vorto.core.api.model.datatype.Property;
 import org.eclipse.vorto.core.api.model.functionblock.FunctionblockModel;
 import org.eclipse.vorto.core.api.model.informationmodel.FunctionblockProperty;
 import org.eclipse.vorto.core.api.model.informationmodel.InformationModel;
@@ -47,8 +53,9 @@ public class WebDeviceGenerator implements ICodeGenerator<InformationModel> {
 			e.printStackTrace();
 		}
 
-		for (FunctionblockProperty fbm : informationModel.getProperties()) {
-			this.generateForFunctionBlock(informationModel, fbm.getType(),
+		for (FunctionblockProperty fbProperty : informationModel
+				.getProperties()) {
+			this.generateForFunctionblockProperty(informationModel, fbProperty,
 					monitor);
 		}
 
@@ -73,17 +80,93 @@ public class WebDeviceGenerator implements ICodeGenerator<InformationModel> {
 		return url;
 	}
 
-	private void generateForFunctionBlock(InformationModel informationModel,
-			FunctionblockModel fbm, IProgressMonitor monitor) {
+	private void generateForFunctionblockProperty(
+			InformationModel informationModel,
+			FunctionblockProperty fbProperty, IProgressMonitor monitor) {
 
-		new EclipseProjectGenerator<FunctionblockModel>(
+		new EclipseProjectGenerator<FunctionblockProperty>(
 				ModuleUtil.getArtifactId(informationModel))
 				.addTask(new ServiceClassGeneratorTask())
 				.addTask(new WebXmlGeneratorTask())
 				.addTask(new FunctionBlockClassGeneratorTask())
 				.addTask(new ConfigurationClassGeneratorTask())
 				.addTask(new StatusClassGeneratorTask())
-				.addTask(new FaultClassGeneratorTask()).generate(fbm, monitor);
+				.addTask(new FaultClassGeneratorTask())
+				.generate(fbProperty, monitor);
+
+		FunctionblockModel fbModel = fbProperty.getType();
+
+		if (fbModel.getFunctionblock() != null) {
+			if (fbModel.getFunctionblock().getConfiguration() != null) {
+				for (Property property : fbModel.getFunctionblock()
+						.getConfiguration().getProperties()) {
+					generateForProperty(informationModel, property, monitor);
+				}
+			}
+
+			if (fbModel.getFunctionblock().getStatus() != null) {
+				for (Property property : fbModel.getFunctionblock().getStatus()
+						.getProperties()) {
+					generateForProperty(informationModel, property, monitor);
+				}
+			}
+
+			if (fbModel.getFunctionblock().getFault() != null) {
+				for (Property property : fbModel.getFunctionblock().getFault()
+						.getProperties()) {
+					generateForProperty(informationModel, property, monitor);
+				}
+			}
+		}
+	}
+
+	private void generateForProperty(InformationModel informationModel,
+			Property property, IProgressMonitor monitor) {
+		if (property.getType() instanceof ObjectPropertyType) {
+			ObjectPropertyType objectType = (ObjectPropertyType) property
+					.getType();
+			if (objectType.getType() instanceof Entity) {
+				generateForEntity(informationModel,
+						(Entity) objectType.getType(), monitor);
+			}
+			else if (objectType.getType() instanceof Enum) {
+				generateForEnum(informationModel,
+						(Enum) objectType.getType(), monitor);
+			}
+		}
+	}
+
+	
+	private void generateForEnum(InformationModel informationModel,
+			Enum e, IProgressMonitor monitor) {
+
+		new EclipseProjectGenerator<Enum>(
+				ModuleUtil.getArtifactId(informationModel)).addTask(
+				new EnumGeneratorTask()).generate(e, monitor);
+	}
+	
+	private void generateForEntity(InformationModel informationModel,
+			Entity entity, IProgressMonitor monitor) {
+
+		new EclipseProjectGenerator<Entity>(
+				ModuleUtil.getArtifactId(informationModel)).addTask(
+				new EntityClassGeneratorTask()).generate(entity, monitor);
+		for (Property property : entity.getProperties()) {
+
+			// Ignore primitive data types
+			if (property.getType() instanceof ObjectPropertyType) {
+				ObjectPropertyType objectType = (ObjectPropertyType) property
+						.getType();
+				if (objectType.getType() instanceof Entity) {
+					generateForEntity(informationModel,
+							(Entity) objectType.getType(), monitor);
+				}
+				if (objectType.getType() instanceof Enum) {
+					generateForEnum(informationModel,
+							(Enum) objectType.getType(), monitor);
+				}
+			}
+		}
 	}
 
 	@Override

@@ -25,9 +25,9 @@ class FaultClassTemplateTest {
 
 	@Test
 	def testGeneration() {
-		var model = TestFunctionblockModelFactory.createFBmodelWithProperties();
+		var fbProperty = TestFunctionblockModelFactory.createFBProperty();
 
-		var result = new FaultClassTemplate().getContent(model);
+		var result = new FaultClassTemplate().getContent(fbProperty);
 		assertEquals(fetchExpected, result);
 	}
 

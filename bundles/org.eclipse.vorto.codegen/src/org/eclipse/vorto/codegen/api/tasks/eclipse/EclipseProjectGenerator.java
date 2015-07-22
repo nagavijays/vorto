@@ -200,7 +200,7 @@ public class EclipseProjectGenerator<Context> implements
 		tasks.add(new GeneratorTaskFromTemplate<Context>(template));
 		return this;
 	}
-
+	
 	public EclipseProjectGenerator<Context> pluginNature(
 			ITemplate<Context> buildFileModule,
 			ITemplate<Context> manifestFileModule, String... srcFolders) {
