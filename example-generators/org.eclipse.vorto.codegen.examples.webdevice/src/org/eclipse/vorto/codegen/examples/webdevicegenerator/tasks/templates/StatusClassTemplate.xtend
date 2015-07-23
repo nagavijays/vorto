@@ -22,6 +22,8 @@ import org.eclipse.vorto.core.api.model.functionblock.FunctionblockModel
 import org.eclipse.vorto.core.api.model.informationmodel.FunctionblockProperty
 import org.eclipse.vorto.core.api.model.datatype.ObjectPropertyType
 import org.eclipse.vorto.core.api.model.datatype.Entity
+import org.eclipse.vorto.core.api.model.datatype.Enum
+import org.eclipse.vorto.codegen.examples.webdevicegenerator.tasks.templates.JavaClassGeneratorUtils
 
 class StatusClassTemplate implements ITemplate<FunctionblockProperty> {
 
@@ -31,31 +33,45 @@ class StatusClassTemplate implements ITemplate<FunctionblockProperty> {
 		package «ModuleUtil.getModelPackage(model)»;
 		
 		import org.codehaus.jackson.map.annotate.JsonSerialize;
+		«JavaClassGeneratorUtils.getImports(model.functionblock.status.properties)»
 		
 		@JsonSerialize
 		public class «fbProperty.name»Status {			
 		«IF model.functionblock.status!=null»
-			«FOR StatusField : model.functionblock.status.properties»	
-			«IF StatusField.type instanceof PrimitivePropertyType»			
-				«var primitiveType = (StatusField.type as PrimitivePropertyType).getType»
+			«FOR statusField : model.functionblock.status.properties»	
+			«IF statusField.type instanceof PrimitivePropertyType»			
+				«var primitiveType = (statusField.type as PrimitivePropertyType).getType»
 				«var primitiveJavaType = PropertyUtil.toJavaFieldType(primitiveType)»
-					private «primitiveJavaType» «StatusField.name» = «PropertyUtil.getDefaultValue(primitiveType)»;
+					private «primitiveJavaType» «statusField.name» = «PropertyUtil.getDefaultValue(primitiveType)»;
 
-					public «primitiveJavaType» get«StatusField.name.toFirstUpper»() {
-						return «StatusField.name»;
+					public «primitiveJavaType» get«statusField.name.toFirstUpper»() {
+						return «statusField.name»;
 					}
 				
-					public void set«StatusField.name.toFirstUpper»(«primitiveJavaType» «StatusField.name») {
-						this.«StatusField.name» = «StatusField.name»;
+					public void set«statusField.name.toFirstUpper»(«primitiveJavaType» «statusField.name») {
+						this.«statusField.name» = «statusField.name»;
+					}
+					
+					«ELSEIF statusField.type instanceof ObjectPropertyType»
+					«var objectType = (statusField.type as ObjectPropertyType).getType»
+					«IF objectType instanceof Entity»
+					private «objectType.name» «statusField.name» = new «objectType.name»();
+				«ELSEIF objectType instanceof Enum»
+					private «objectType.name» «statusField.name»
+				«ENDIF»
+				
+					public «objectType.name» get«statusField.name.toFirstUpper»() {
+						return «statusField.name»;
 					}
 				
-			«ENDIF»
-			«IF StatusField.type instanceof ObjectPropertyType»
-				
+					public void set«statusField.name.toFirstUpper»(«objectType.name» «statusField.name») {
+						this.«statusField.name» = «statusField.name»;
+					}
 			«ENDIF»
 		«ENDFOR»						
 		«ENDIF»			
 		}'''
 	}
+	
 	
 }

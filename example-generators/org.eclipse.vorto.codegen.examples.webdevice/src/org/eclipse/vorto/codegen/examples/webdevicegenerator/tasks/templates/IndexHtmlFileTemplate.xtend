@@ -19,6 +19,11 @@ import org.eclipse.vorto.codegen.api.tasks.ITemplate
 import org.eclipse.vorto.core.api.model.datatype.PrimitivePropertyType
 import org.eclipse.vorto.core.api.model.informationmodel.FunctionblockProperty
 import org.eclipse.vorto.core.api.model.informationmodel.InformationModel
+import org.eclipse.vorto.core.api.model.datatype.ObjectPropertyType
+import org.eclipse.vorto.core.api.model.datatype.Property
+import org.eclipse.emf.common.util.EList
+import org.eclipse.vorto.core.api.model.datatype.Entity
+import org.eclipse.vorto.core.api.model.datatype.Enum
 
 class IndexHtmlFileTemplate implements ITemplate<InformationModel> {
 			
@@ -104,26 +109,7 @@ class IndexHtmlFileTemplate implements ITemplate<InformationModel> {
 						<fieldset id="«fbProperty.name»_status_fieldset">
 							<legend>Status:</legend>
 							«IF  fbProperty.type.functionblock.status!=null && fbProperty.type.functionblock.status.properties.size>0»
-							<table border="0" align="center" width="100%">
-							«var i=0»
-							«FOR status : fbProperty.type.functionblock.status.properties»
-							«IF status.type instanceof PrimitivePropertyType»
-							«IF i%2==0»
-								<tr>
-							«ENDIF»
-								<td  width="20%"><label>«WordSeperator.splitIntoWords(status.name)»:</label></td>
-								<td width="30%"><label id="«fbProperty.name»_status_id_«status.name»" class="display"></label></td>
-							«IF (i==fbProperty.type.functionblock.status.properties.size-1) && (fbProperty.type.functionblock.status.properties.size%2==1)»
-								<td  width="20%"><label></td>
-								<td  width="30%"><label></td>
-								</tr>
-							«ENDIF»
-							«IF i++%2==1»
-								</tr>
-							«ENDIF»
-							«ENDIF»	
-							«ENDFOR»
-							</table>
+								«getPropertyContent(fbProperty.name + "_status_id_", fbProperty.type.functionblock.status.properties,false)»
 							«ELSE»
 							<div class="column">
 								<label>No status information is available</label>
@@ -182,26 +168,7 @@ class IndexHtmlFileTemplate implements ITemplate<InformationModel> {
 						<fieldset id="«fbProperty.name»_fault_fieldset">
 							<legend>Fault:</legend>
 							«IF  fbProperty.type.functionblock.fault!=null && fbProperty.type.functionblock.fault.properties.size>0»
-							<table border="0" align="center" width="100%">
-							«var i=0»
-							«FOR fault : fbProperty.type.functionblock.fault.properties»
-							«IF fault.type instanceof PrimitivePropertyType»
-							«IF i%2==0»
-								<tr>
-							«ENDIF»
-								<td  width="20%"><label>«WordSeperator.splitIntoWords(fault.name)»:</label></td>
-								<td width="30%"><label id="«fbProperty.name»_fault_id_«fault.name»" class="display"></label></td>
-							«IF (i==fbProperty.type.functionblock.fault.properties.size-1) && (fbProperty.type.functionblock.fault.properties.size%2==1)»
-									<td  width="20%"><label></td>
-									<td  width="30%"><label></td>
-								</tr>
-							«ENDIF»
-							«IF i++%2==1»
-								</tr>
-							«ENDIF»
-							«ENDIF»
-							«ENDFOR»
-							</table>
+								«getPropertyContent(fbProperty.name + "_fault_id_", fbProperty.type.functionblock.fault.properties, false)»
 							«ELSE»
 							<div class="column">
 								<label>No fault information is available</label>
@@ -240,4 +207,48 @@ class IndexHtmlFileTemplate implements ITemplate<InformationModel> {
 			'''		
 	}
 	
+	def String getPropertyContent(String prefix, EList<Property> properties, boolean inputAllowed) {
+		'''
+		<table border="0" align="center" width="100%">
+			«var i=0»
+			«FOR property : properties»
+				«IF property.type instanceof PrimitivePropertyType»
+					«IF i%2==0»
+						<tr>
+					«ENDIF»
+					<td  width="20%"><label>«WordSeperator.splitIntoWords(property.name)»:</label></td>
+					«IF inputAllowed»
+						<td width="30%"><input type="text" name="«prefix»«property.name»" id="«prefix»«property.name»">
+					«ELSE»
+						<td width="30%"><label id="«prefix»«property.name»" class="display"></label></td>
+					«ENDIF»
+					«IF (i==properties.size-1) && (properties.size%2==1)»
+						<td  width="20%"><label></td>
+						<td  width="30%"><label></td>
+						</tr>
+					«ENDIF»
+					«IF i++%2==1»
+						</tr>
+					«ENDIF»
+				«ELSEIF property.type instanceof ObjectPropertyType»
+					«var objectType = property.type as ObjectPropertyType»
+					«IF objectType.type instanceof Entity»
+						<tr>
+							<td width="80%">
+								<fieldset id="«prefix»«property.name»">
+									<legend>«property.name»</legend>
+									«getPropertyContent(prefix+property.name+"_", (objectType.type as Entity).properties, inputAllowed) as String»
+								</fieldset>
+							</td>
+						</tr>
+					«ELSEIF objectType.type instanceof Enum»
+						<tr>
+							<td  width="20%"><label>«WordSeperator.splitIntoWords(property.name)»:</label></td>
+							<td width="30%"><label id="«prefix»«property.name»" class="display"></label></td>
+						</tr>
+					«ENDIF»			
+				«ENDIF»	
+			«ENDFOR»
+		</table>'''
+	}
 }

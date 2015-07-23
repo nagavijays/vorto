@@ -17,6 +17,9 @@
 
 import org.eclipse.vorto.codegen.api.tasks.ITemplate
 import org.eclipse.vorto.codegen.examples.webdevicegenerator.tasks.ModuleUtil
+import org.eclipse.vorto.core.api.model.datatype.Entity
+import org.eclipse.vorto.core.api.model.datatype.Enum
+import org.eclipse.vorto.core.api.model.datatype.ObjectPropertyType
 import org.eclipse.vorto.core.api.model.datatype.PrimitivePropertyType
 import org.eclipse.vorto.core.api.model.functionblock.FunctionblockModel
 import org.eclipse.vorto.core.api.model.informationmodel.FunctionblockProperty
@@ -30,6 +33,7 @@ class ConfigurationClassTemplate implements ITemplate<FunctionblockProperty> {
 		package «ModuleUtil.getModelPackage(model)»;
 
 		import org.codehaus.jackson.map.annotate.JsonSerialize;
+		«JavaClassGeneratorUtils.getImports(model.functionblock.status.properties)»
 		
 		@JsonSerialize
 		public class «fbProperty.name»Configuration {			
@@ -48,7 +52,22 @@ class ConfigurationClassTemplate implements ITemplate<FunctionblockProperty> {
 					public void set«configurationField.name.toFirstUpper»(«primitiveJavaType» «configurationField.name») {
 						this.«configurationField.name» = «configurationField.name»;
 					}		
-		    «ENDIF»
+		    «ELSEIF configurationField.type instanceof ObjectPropertyType»
+				«var objectType = (configurationField.type as ObjectPropertyType).getType»
+				«IF objectType instanceof Entity»
+					private «objectType.name» «configurationField.name» = new «objectType.name»();
+				«ELSEIF objectType instanceof Enum»
+					private «objectType.name» «configurationField.name»
+				«ENDIF»
+				
+					public «objectType.name» get«configurationField.name.toFirstUpper»() {
+						return «configurationField.name»;
+					}
+				
+					public void set«configurationField.name.toFirstUpper»(«objectType.name» «configurationField.name») {
+						this.«configurationField.name» = «configurationField.name»;
+					}
+			«ENDIF»
 			«ENDFOR»						
 		«ENDIF»			
 		}'''

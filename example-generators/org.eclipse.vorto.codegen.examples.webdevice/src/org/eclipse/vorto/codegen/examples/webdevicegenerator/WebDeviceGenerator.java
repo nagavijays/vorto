@@ -153,10 +153,12 @@ public class WebDeviceGenerator implements ICodeGenerator<InformationModel> {
 				new EntityClassGeneratorTask()).generate(entity, monitor);
 		for (Property property : entity.getProperties()) {
 
-			// Ignore primitive data types
+			// Ignore primitive data types - there is nothing to be generated
 			if (property.getType() instanceof ObjectPropertyType) {
 				ObjectPropertyType objectType = (ObjectPropertyType) property
 						.getType();
+				
+				// If a data type already exists it will be overwritten
 				if (objectType.getType() instanceof Entity) {
 					generateForEntity(informationModel,
 							(Entity) objectType.getType(), monitor);

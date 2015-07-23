@@ -17,6 +17,9 @@
 
 import org.eclipse.vorto.codegen.api.tasks.ITemplate
 import org.eclipse.vorto.codegen.examples.webdevicegenerator.tasks.ModuleUtil
+import org.eclipse.vorto.core.api.model.datatype.Entity
+import org.eclipse.vorto.core.api.model.datatype.Enum
+import org.eclipse.vorto.core.api.model.datatype.ObjectPropertyType
 import org.eclipse.vorto.core.api.model.datatype.PrimitivePropertyType
 import org.eclipse.vorto.core.api.model.functionblock.FunctionblockModel
 import org.eclipse.vorto.core.api.model.informationmodel.FunctionblockProperty
@@ -29,6 +32,7 @@ class FaultClassTemplate implements ITemplate<FunctionblockProperty> {
 		package «ModuleUtil.getModelPackage(model)»;
 
 		import org.codehaus.jackson.map.annotate.JsonSerialize;
+		«JavaClassGeneratorUtils.getImports(model.functionblock.status.properties)»
 		
 		@JsonSerialize
 		public class «fbProperty.name»Fault {			
@@ -47,7 +51,22 @@ class FaultClassTemplate implements ITemplate<FunctionblockProperty> {
 					public void set«FaultField.name.toFirstUpper»(«primitiveJavaType» «FaultField.name») {
 						this.«FaultField.name» = «FaultField.name»;
 					}		
-		    «ENDIF»
+		    «ELSEIF FaultField.type instanceof ObjectPropertyType»
+				«var objectType = (FaultField.type as ObjectPropertyType).getType»
+				«IF objectType instanceof Entity»
+					private «objectType.name» «FaultField.name» = new «objectType.name»();
+				«ELSEIF objectType instanceof Enum»
+					private «objectType.name» «FaultField.name»
+				«ENDIF»
+				
+					public «objectType.name» get«FaultField.name.toFirstUpper»() {
+						return «FaultField.name»;
+					}
+				
+					public void set«FaultField.name.toFirstUpper»(«objectType.name» «FaultField.name») {
+						this.«FaultField.name» = «FaultField.name»;
+					}
+			«ENDIF»
 			«ENDFOR»						
 		«ENDIF»			
 		}'''

@@ -14,9 +14,11 @@ class EntityClassTemplate implements ITemplate<Entity> {
 	override getContent(Entity entity) {
 		return '''
 		package «ModuleUtil.getEntityPackage(entity)»;
-
+		
+		import org.codehaus.jackson.map.annotate.JsonSerialize;
 		«getImportsContent(entity)»
 		
+		@JsonSerialize
 		public class «entity.name» {	
 			«getPropertiesContent(entity)»
 			«getSettersGettersContent(entity)»
