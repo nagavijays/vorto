@@ -1,15 +1,9 @@
-target/
-src-gen/
-xtend-gen/
-bin/
-.antlr*
-.metadata/
-*/plugin.xml_gen
+_site
+.sass-cache
 .DS_Store
+.jekyll-metadata
 
-/.ssh
-*.checkstyle
-.settings/
-.classpath
-.project
-generated-sources
+# Ignore the config file that's used for gh-pages.
+_config.gh-pages.yml
+
+Gemfile.lock
