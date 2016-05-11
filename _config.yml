@@ -3,7 +3,7 @@ title:       Home
 email:       nagavijays@gmail.com
 author:      Nagavijay Sivakumar
 description: "Personal webpage"
-baseurl:     "/gsoc"
+baseurl:     ""
 url:         "http://nagavijays.github.io"
 date_format: "%b %-d, %Y"
 
