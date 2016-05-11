@@ -4,7 +4,7 @@ email:       nagavijays@gmail.com
 author:      Nagavijay Sivakumar
 description: "Personal webpage"
 baseurl:     ""
-url:         "http://nagavijays.github.io"
+url:         "http://nagavijays.github.io/vorto"
 date_format: "%b %-d, %Y"
 
 # Google services
